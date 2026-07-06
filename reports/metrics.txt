@@ -1,19 +1,19 @@
 Validation metrics (macro F1):
-Navec: 0.630
-TF-IDF-weighted: 0.625
-Word2Vec: 0.614
-RusVectores (with morphology): 0.566
+Navec: 0.6246
+TF-IDF-weighted: 0.6249
+Word2Vec: 0.6056
+RusVectores (with morphology): 0.5589
 
 Test metrics (macro F1):
-Navec: 0.633
-TF-IDF-weighted: 0.624
-Word2Vec: 0.617
-RusVectores: 0.565
+Navec: 0.6303
+TF-IDF-weighted: 0.6236
+Word2Vec: 0.6137
+RusVectores: 0.5655
 
 Accuracy (test):
-Navec: 0.844
-TF-IDF-weighted: 0.830
-Word2Vec: 0.834
-RusVectores: 0.764
+Navec: 0.8441
+TF-IDF-weighted: 0.8300
+Word2Vec: 0.8339
+RusVectores: 0.7636
 
 Best model: Navec + Logistic Regression
