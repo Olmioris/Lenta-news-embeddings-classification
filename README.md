@@ -86,10 +86,6 @@ Intrinsic evaluation includes:
  - odd‑one‑out;
  - semantic similarity checks.
 
-Examples saved in:
-
-reports/intrinsic_examples.txt
-
 ## 5.1 Word2Vec Hyperparameters Justification.
 
 The Word2Vec model was trained on the Lenta.ru corpus using a set of hyperparameters chosen to balance quality, training stability, and computational efficiency.
@@ -189,10 +185,6 @@ All models use:
 
 - macro F1 as the main metric
 
-Validation metrics for all models are saved in:
-
-reports/dz2_metrics.txt
-
 ## 8. Final Evaluation (Test Set).
 
 The best model on validation — Navec — is evaluated on the held‑out test set.
@@ -202,10 +194,6 @@ Metrics include:
  - Macro F1;
  - Classification Report;
  - Confusion Matrix.
-
-Confusion matrix saved in:
-
-reports/confusion_matrix.png
 
 Strong classes: Russia, World, Culture, Sport, Economy.
 
@@ -252,11 +240,11 @@ Model Improvements
 
 ## 11. How to Run.
 
-Install dependencies
+Install dependencies:
 
 pip install -r requirements.txt
 
-Run notebooks in order
+Run notebooks in order:
 
 - 01_data_preparation.ipynb
 
@@ -264,16 +252,8 @@ Run notebooks in order
 
 - 03_tfidf_weighting_and_evaluation.ipynb
 
-Evaluate the best model
+Evaluate the best model:
 
 python src/evaluate.py
-
-Experiment Report
-
-Detailed model evaluation and intrinsic analysis are available in:
-
-reports/dz2_metrics.txt,
-
-reports/intrinsic_examples.txt.
 
 Full experiment report: [Issue #2](https://github.com/Olmioris/Lenta-news-topic-classification/issues/2).
