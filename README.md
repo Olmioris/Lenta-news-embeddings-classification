@@ -68,7 +68,7 @@ The project compares four embedding strategies:
 
 - RusVectōrēs (lemma_POS embeddings)
 
-- TF‑IDF‑weighted embeddings (best performing)
+- TF‑IDF‑weighted embeddings (nearly matching Navec)
 
 ### Validation macro F1 results:
 
@@ -195,7 +195,7 @@ reports/dz2_metrics.txt
 
 ## 8. Final Evaluation (Test Set).
 
-The best model (TF‑IDF‑weighted embeddings) is evaluated on the held‑out test set.
+The best model on validation — Navec — is evaluated on the held‑out test set.
 
 Metrics include: 
  - Accuracy;
@@ -207,8 +207,9 @@ Confusion matrix saved in:
 
 reports/confusion_matrix.png
 
-Strong classes: Russia, World, Culture, Sport, Economy
-Weak classes: Library (1 sample), Science & Technology (54 samples)
+Strong classes: Russia, World, Culture, Sport, Economy.
+
+Weak classes: Library (1 sample), Science & Technology (54 samples).
 
 Macro F1 = 0.63 reflects the difficulty of rare classes.
 
