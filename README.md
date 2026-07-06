@@ -90,6 +90,76 @@ Examples saved in:
 
 reports/intrinsic_examples.txt
 
+## 5.1 Word2Vec Hyperparameters Justification.
+
+The Word2Vec model was trained on the Lenta.ru corpus using a set of hyperparameters chosen to balance quality, training stability, and computational efficiency.
+
+*vector_size = 100*
+
+A 100‑dimensional embedding space provides an optimal balance for a medium‑sized corpus:
+
+- Lenta.ru contains ~100k documents — not large enough to benefit from 300‑dimensional vectors.
+
+- Higher dimensions require more data and training time.
+
+- Empirically, 100 dimensions capture semantic relations well for Russian news.
+
+*window = 5*
+
+Defines how many words to the left and right are considered context:
+
+- A window of 5 works well for Russian morphology.
+
+- Captures meaningful semantic relations in news articles.
+
+- Smaller windows capture mostly syntax; larger windows dilute context.
+
+*min_count = 5*
+
+Minimum frequency threshold for a word to be included in the vocabulary:
+
+- Rare words introduce noise and unstable gradients.
+
+- A threshold of 5 removes garbage tokens while preserving important entities (names, cities, organizations).
+
+*workers = 4*
+
+Number of parallel threads:
+
+- Speeds up training.
+
+- Suitable for typical environments (local machine, Colab).
+
+- Avoids excessive CPU load.
+
+*sg = 1 (skip‑gram)*
+
+Model architecture:
+
+- sg = 1 → skip‑gram, better for rare words.
+
+- sg = 0 → CBOW, faster but worse on infrequent tokens.
+
+- News contain many rare entities (names, organizations), so skip‑gram produces higher‑quality embeddings.
+
+*epochs = 10*
+
+Number of training passes over the corpus:
+
+- Fewer epochs lead to underfitting.
+
+- More epochs give diminishing returns on a medium corpus.
+
+- 10 epochs provide stable convergence and good semantic quality.
+
+*seed = RANDOM_STATE*
+
+A fixed seed ensures reproducibility:
+
+- Required for consistent experimental results.
+
+- Guarantees identical embeddings across repeated runs.
+
 ## 6. Sentence Embedding Strategies.
 
 Two main strategies were evaluated:
