@@ -88,10 +88,6 @@ Intrinsic‑оценка включает:
 - odd‑one‑out;
 - проверки семантической близости.
 
-Примеры сохранены в:
-
-reports/intrinsic_examples.txt
-
 ### 5.1 Обоснование гиперпараметров Word2Vec
 
 **vector_size = 100**  
@@ -128,8 +124,6 @@ reports/intrinsic_examples.txt
 
 <img width="163" height="60" alt="image" src="https://github.com/user-attachments/assets/beaca120-55a7-4597-ab2c-8563fb0055a2" />
 
-Этот метод дал *лучшие результаты*.
-
 ## 7. Обучение моделей.
 
 Все модели используют:
@@ -141,10 +135,6 @@ max_iter = 1000
 n_jobs = -1
 
 основная метрика — macro F1
-
-Метрики валидации всех моделей сохранены в:
-
-reports/dz2_metrics.txt.
 
 ## 8. Финальная оценка (тестовая выборка).
 
@@ -159,10 +149,6 @@ reports/dz2_metrics.txt.
 - Classification Report
 
 - Confusion Matrix
-
-Матрица ошибок сохранена в:
-
-reports/confusion_matrix.png
 
 ## 9. Анализ ошибок.
 
@@ -221,11 +207,11 @@ LinearSVC
 
 ## 11. Как запустить.
 
-Установка зависимостей
+Установка зависимостей:
 
 pip install -r requirements.txt
 
-Запуск ноутбуков по порядку
+Запуск ноутбуков по порядку:
 
 - 01_data_preparation.ipynb
 
@@ -233,16 +219,8 @@ pip install -r requirements.txt
 
 - 03_tfidf_weighting_and_evaluation.ipynb
 
-Финальная оценка лучшей модели
+Финальная оценка лучшей модели:
 
 python src/evaluate.py
-
-Отчёт эксперимента
-
-Подробные метрики и intrinsic‑анализ доступны в:
-
-reports/dz2_metrics.txt
-
-reports/intrinsic_examples.txt.
 
 Full experiment report: [Issue #2](https://github.com/Olmioris/Lenta-news-topic-classification/issues/2).
