@@ -244,3 +244,5 @@ python src/evaluate.py
 reports/dz2_metrics.txt
 
 reports/intrinsic_examples.txt.
+
+Full experiment report: [Issue #2](https://github.com/Olmioris/Lenta-news-topic-classification/issues/2).
