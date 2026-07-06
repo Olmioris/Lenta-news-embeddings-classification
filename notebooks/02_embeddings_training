@@ -1,1 +1,99 @@
+# Embeddings Training — Lenta News Classification
+# This notebook trains Word2Vec embeddings, loads pretrained models (Navec, RusVectōrēs) and performs intrinsic evaluation.
 
+# --- Imports ---
+import re
+import urllib.request
+import numpy as np
+import pandas as pd
+from gensim.models import Word2Vec, KeyedVectors
+from navec import Navec
+import pymorphy3
+import razdel
+from sklearn.metrics import accuracy_score, f1_score
+
+# --- Load preprocessed data ---
+train_df = pd.read_csv("train.csv")
+val_df = pd.read_csv("val.csv")
+test_df = pd.read_csv("test.csv")
+
+# --- Tokenization ---
+def simple_tokenize(text: str):
+    text = text.lower()
+    text = re.sub(r"[^а-яa-z0-9ё ]+", " ", text)
+    return text.split()
+
+def build_corpus(texts: pd.Series):
+    return [simple_tokenize(t) for t in texts]
+
+train_corpus = build_corpus(train_df["text"])
+val_corpus = build_corpus(val_df["text"])
+test_corpus = build_corpus(test_df["text"])
+
+# --- Train Word2Vec ---
+def train_word2vec(corpus, vector_size=100, window=5, min_count=5, workers=4, sg=1, epochs=10, seed=42):
+    model = Word2Vec(
+        sentences=corpus,
+        vector_size=vector_size,
+        window=window,
+        min_count=min_count,
+        workers=workers,
+        sg=sg,
+        seed=seed,
+    )
+    model.train(corpus, total_examples=len(corpus), epochs=epochs)
+    return model
+
+w2v_model = train_word2vec(train_corpus)
+
+# --- Intrinsic Evaluation ---
+def inspect_embeddings(model):
+    words = ["россия", "москва", "футбол", "экономика"]
+    for w in words:
+        if w in model.wv:
+            print(f"\nSimilar words for '{w}':")
+            for s, score in model.wv.most_similar(w, topn=5):
+                print(s, score)
+    group = [w for w in words if w in model.wv]
+    if len(group) >= 3:
+        print("\nOdd one out:", model.wv.doesnt_match(group))
+
+inspect_embeddings(w2v_model)
+
+# --- Load Pretrained Embeddings ---
+rus_url = (
+    "https://rusvectores.org/static/models/"
+    "rusvectores4/ruwikiruscorpora/"
+    "ruwikiruscorpora_upos_skipgram_300_2_2018.vec.gz"
+)
+rus_path = "ruwikiruscorpora_upos_skipgram_300_2_2018.vec.gz"
+urllib.request.urlretrieve(rus_url, rus_path)
+rusvectores = KeyedVectors.load_word2vec_format(rus_path)
+rus_dim = rusvectores.vector_size
+
+!wget https://storage.yandexcloud.net/natasha-navec/packs/navec_news_v1_1B_250K_300d_100q.tar -O navec_news_v1_1B_250K_300d_100q.tar
+navec_path = "navec_news_v1_1B_250K_300d_100q.tar"
+navec = Navec.load(navec_path)
+navec_dim = navec.pq.dim
+
+# --- Morphological Tokenization for RusVectōrēs ---
+morph = pymorphy3.MorphAnalyzer()
+
+def tokenize_with_pos(text: str):
+    tokens = [t.text for t in razdel.tokenize(text)]
+    result = []
+    for t in tokens:
+        if re.fullmatch(r"[a-zа-яё]+", t):
+            p = morph.parse(t)[0]
+            lemma = p.normal_form
+            pos = p.tag.POS
+            if pos:
+                result.append(f"{lemma}_{pos}")
+        else:
+            result.append(t)
+    return result
+
+# --- Save intrinsic examples ---
+with open("reports/intrinsic_examples.txt", "w", encoding="utf-8") as f:
+    f.write("Intrinsic evaluation examples for Word2Vec\n")
+    f.write("Similar words and odd-one-out results.\n")
