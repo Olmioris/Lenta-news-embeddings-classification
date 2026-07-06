@@ -70,6 +70,16 @@ The project compares four embedding strategies:
 
 - TF‑IDF‑weighted embeddings (best performing)
 
+### Validation macro F1 results:
+
+ - Navec — 0.630 (best)
+
+ - TF‑IDF‑weighted embeddings — 0.625
+
+ - Word2Vec — 0.614
+
+ - RusVectōrēs (with morphology) — 0.566
+
 Intrinsic evaluation includes:
 
  - nearest neighbors;
@@ -95,7 +105,7 @@ Each word vector is multiplied by its TF‑IDF weight:
 
 <img width="163" height="60" alt="image" src="https://github.com/user-attachments/assets/087462ec-7bbd-43b5-95cf-af2f07a0be3e" />
 
-This method produced *the best results*.
+This method significantly improves embedding quality and nearly matches Navec.
 
 ## 7. Model Training.
 
@@ -126,6 +136,11 @@ Metrics include:
 Confusion matrix saved in:
 
 reports/confusion_matrix.png
+
+Strong classes: Russia, World, Culture, Sport, Economy
+Weak classes: Library (1 sample), Science & Technology (54 samples)
+
+Macro F1 = 0.63 reflects the difficulty of rare classes.
 
 ## 9. Error Analysis.
 
@@ -167,7 +182,6 @@ Model Improvements
 ## 11. How to Run.
 
 Install dependencies
-
 
 pip install -r requirements.txt
 
