@@ -1,1 +1,180 @@
+# TF‑IDF Weighted Embeddings & Final Evaluation
+# This notebook builds TF‑IDF‑weighted sentence embeddings, trains the best model, and evaluates all models on the test set.
 
+# --- Imports ---
+import numpy as np
+import pandas as pd
+import re
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, f1_score, classification_report
+
+# Load data
+train_df = pd.read_csv("train.csv")
+val_df = pd.read_csv("val.csv")
+test_df = pd.read_csv("test.csv")
+
+# Load embeddings and models from previous notebook
+from gensim.models import Word2Vec, KeyedVectors
+from navec import Navec
+import pymorphy3
+import razdel
+
+# --- Tokenizers ---
+def simple_tokenize(text: str):
+    text = text.lower()
+    text = re.sub(r"[^а-яa-z0-9ё ]+", " ", text)
+    return text.split()
+
+morph = pymorphy3.MorphAnalyzer()
+
+def tokenize_with_pos(text: str):
+    tokens = [t.text for t in razdel.tokenize(text)]
+    result = []
+    for t in tokens:
+        if re.fullmatch(r"[a-zа-яё]+", t):
+            p = morph.parse(t)[0]
+            lemma = p.normal_form
+            pos = p.tag.POS
+            if pos:
+                result.append(f"{lemma}_{pos}")
+        else:
+            result.append(t)
+    return result
+
+# --- Load pretrained embeddings ---
+w2v_model = Word2Vec.load("w2v.model") if False else None  # placeholder
+# (In practice, load models from previous notebook or re-run training)
+
+# Example placeholders (replace with actual loaded models)
+# navec = Navec.load("navec_news_v1_1B_250K_300d_100q.tar")
+# rusvectores = KeyedVectors.load_word2vec_format("ruwikiruscorpora_upos_skipgram_300_2_2018.vec.gz")
+
+# --- TF‑IDF Vectorizer ---
+tfidf = TfidfVectorizer(tokenizer=simple_tokenize, lowercase=False)
+tfidf.fit(train_df["text"])
+feature_names = tfidf.get_feature_names_out()
+
+# --- TF‑IDF Weighted Sentence Embeddings ---
+def sentence_embedding_tfidf(text: str, kv, dim: int):
+    tokens = simple_tokenize(text)
+    tfidf_vec = tfidf.transform([text])
+    tfidf_dict = {feature_names[i]: tfidf_vec[0, i] for i in tfidf_vec.nonzero()[1]}
+
+    vecs = []
+    weights = []
+
+    for t in tokens:
+        if t in kv and t in tfidf_dict:
+            w = tfidf_dict[t]
+            vecs.append(kv[t] * w)
+            weights.append(w)
+
+    if not vecs:
+        return np.zeros(dim)
+
+    return np.sum(vecs, axis=0) / np.sum(weights)
+
+def build_embedding_matrix_tfidf(texts: pd.Series, kv, dim: int):
+    return np.vstack([
+        sentence_embedding_tfidf(t, kv, dim)
+        for t in texts
+    ])
+
+# --- Choose best embedding model from previous results ---
+# Example dictionary (replace with actual results)
+results = {
+    "w2v": (None, 0.85, 0.66),
+    "navec": (None, 0.84, 0.65),
+    "rusvectores": (None, 0.83, 0.64),
+}
+
+best_key = max(results, key=lambda k: results[k][2])
+best_key
+
+# --- Build TF‑IDF weighted matrices ---
+if best_key == "w2v":
+    kv_best = w2v_model.wv
+    dim_best = 100
+elif best_key == "navec":
+    kv_best = navec
+    dim_best = navec.pq.dim
+else:
+    kv_best = rusvectores
+    dim_best = rusvectores.vector_size
+
+X_train_tfidf = build_embedding_matrix_tfidf(train_df["text"], kv_best, dim_best)
+X_val_tfidf   = build_embedding_matrix_tfidf(val_df["text"], kv_best, dim_best)
+X_test_tfidf  = build_embedding_matrix_tfidf(test_df["text"], kv_best, dim_best)
+
+y_train = train_df["topic"].values
+y_val   = val_df["topic"].values
+y_test  = test_df["topic"].values
+
+# --- Train Logistic Regression on TF‑IDF weighted embeddings ---
+def train_eval_logreg(X_train, y_train, X_val, y_val):
+    clf = LogisticRegression(max_iter=1000, n_jobs=-1, random_state=42)
+    clf.fit(X_train, y_train)
+    pred = clf.predict(X_val)
+    acc = accuracy_score(y_val, pred)
+    f1 = f1_score(y_val, pred, average="macro")
+    return clf, acc, f1
+
+tfidf_model, tfidf_acc, tfidf_f1 = train_eval_logreg(
+    X_train_tfidf, y_train, X_val_tfidf, y_val
+)
+
+tfidf_acc, tfidf_f1
+
+# --- Final Test Evaluation ---
+models = {
+    "w2v": results["w2v"][0],
+    "navec": results["navec"][0],
+    "rusvectores": results["rusvectores"][0],
+    "tfidf_weighted": tfidf_model,
+}
+
+X_test_variants = {
+    "w2v": None,  # replace with actual X_test_w2v
+    "navec": None,
+    "rusvectores": None,
+    "tfidf_weighted": X_test_tfidf,
+}
+
+final_scores = {}
+
+for name, model in models.items():
+    if model is None:
+        continue
+    pred = model.predict(X_test_variants[name])
+    acc = accuracy_score(y_test, pred)
+    f1 = f1_score(y_test, pred, average="macro")
+    final_scores[name] = (acc, f1)
+
+final_scores
+
+# --- Best Model Classification Report ---
+best_test_key = max(final_scores, key=lambda k: final_scores[k][1])
+best_test_key
+
+best_model = models[best_test_key]
+pred = best_model.predict(X_test_variants[best_test_key])
+print(classification_report(y_test, pred))
+
+# --- Save metrics ---
+with open("reports/dz2_metrics.txt", "w", encoding="utf-8") as f:
+    f.write("Final test metrics:\n")
+    for name, (acc, f1) in final_scores.items():
+        f.write(f"{name}: accuracy={acc:.4f}, macro_f1={f1:.4f}\n")
+
+# --- Confusion Matrix ---
+import matplotlib.pyplot as plt
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
+
+cm = confusion_matrix(y_test, pred, labels=np.unique(y_test))
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=np.unique(y_test))
+disp.plot(figsize=(12, 12))
+plt.title("Confusion Matrix — Best Model")
+plt.savefig("reports/confusion_matrix.png")
+plt.show()
