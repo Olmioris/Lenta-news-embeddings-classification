@@ -87,45 +87,6 @@ def evaluate_model(
 
 
 # ============================
-#   Model Comparison
-# ============================
-
-def compare_models(
-    models: Dict[str, LogisticRegression],
-    X_val_variants: Dict[str, np.ndarray],
-    y_val: np.ndarray
-) -> Dict[str, Tuple[float, float]]:
-    """
-    Compare multiple models on the same validation set.
-
-    Parameters
-    ----------
-    models : dict
-        Mapping: model_name → classifier.
-    X_val_variants : dict
-        Mapping: model_name → feature matrix.
-    y_val : np.ndarray
-        Validation labels.
-
-    Returns
-    -------
-    dict
-        Mapping: model_name → (accuracy, macro_f1)
-    """
-    results = {}
-
-    for name, clf in models.items():
-        X_val = X_val_variants.get(name)
-        if X_val is None:
-            continue
-
-        acc, f1 = evaluate_model(clf, X_val, y_val)
-        results[name] = (acc, f1)
-
-    return results
-
-
-# ============================
 #   Prediction Helper
 # ============================
 
