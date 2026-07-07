@@ -60,43 +60,6 @@ def evaluate_on_test(
 
 
 # ============================
-#   Confusion Matrix
-# ============================
-
-def plot_confusion_matrix(
-    clf,
-    X_test: np.ndarray,
-    y_test: np.ndarray,
-    labels,
-    save_path: str = "reports/confusion_matrix.png"
-):
-    """
-    Plot and save confusion matrix for the best model.
-
-    Parameters
-    ----------
-    clf : LogisticRegression
-        Trained classifier.
-    X_test : np.ndarray
-        Test feature matrix.
-    y_test : np.ndarray
-        True labels.
-    labels : list
-        Sorted list of class labels.
-    save_path : str
-        Path to save the PNG file.
-    """
-    pred = clf.predict(X_test)
-    cm = confusion_matrix(y_test, pred, labels=labels)
-
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
-    disp.plot(figsize=(12, 12))
-    plt.title("Confusion Matrix — Best Model")
-    plt.savefig(save_path)
-    plt.close()
-
-
-# ============================
 #   Save Metrics
 # ============================
 
